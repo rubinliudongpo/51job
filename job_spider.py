@@ -70,7 +70,7 @@ class JobSpider():
         jieba.load_userdict(file_path)
         seg_list = jieba.cut(post, cut_all=False)
         counter = dict()
-        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s]"
+        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s\d]"
         for seg in seg_list:
             if not re.match(pattern, seg, re.VERBOSE):
                 counter[seg] = counter.get(seg, 1) + 1
