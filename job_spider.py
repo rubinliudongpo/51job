@@ -9,6 +9,8 @@ import jieba
 from wordcloud import WordCloud
 import os
 import re
+import pandas as pd
+from numpy import genfromtxt
 
 class JobSpider():
 
@@ -70,7 +72,7 @@ class JobSpider():
         jieba.load_userdict(file_path)
         seg_list = jieba.cut(post, cut_all=False)
         counter = dict()
-        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s]"
+        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s\d]"
         for seg in seg_list:
             if not re.match(pattern, seg, re.VERBOSE):
                 counter[seg] = counter.get(seg, 1) + 1
@@ -96,12 +98,16 @@ class JobSpider():
         """ 招聘大概信息，职位，薪酬以及工作地点 """
         lst = []
         for c in self.company:
-            lst.append((c.get('salary'), c.get('post'), c.get('locate')))
+            post = c.get('post').replace(',', "或").replace("\"","").replace("#", "Sharp")
+            lst.append((c.get('salary'), post, c.get('locate')))
         pprint(lst)
         file_path = os.path.join("data", "post_salary_locate.csv")
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(lst)
+        headers = ['工资', '职位名称', '地区']
+        per_data = genfromtxt(file_path, delimiter=',')
+        plt.plot(per_data)
 
     def post_salary(self):
         """ 薪酬统一处理 """
@@ -161,8 +167,7 @@ class JobSpider():
                 counter[row[0]] = counter.get(row[0], int(row[1]))
             pprint(counter)
         file_path = os.path.join("font", "msyh.ttf")
-        wordcloud = WordCloud(font_path=file_path,
-                              max_words=100, height=600, width=1200).generate_from_frequencies(counter)
+        wordcloud = WordCloud(font_path=file_path, max_words=100, height=600, width=1200).generate_from_frequencies(counter)
         plt.imshow(wordcloud)
         plt.axis('off')
         plt.show()
@@ -174,6 +179,7 @@ class JobSpider():
             create table jobpost(
                 j_salary float(3, 1),
                 j_locate text,
+                j_post text
                 j_post text
             );
         """
@@ -206,8 +212,8 @@ if __name__ == "__main__":
     spider.post_require()
     spider.post_desc_counter()
     spider.post_salary_locate()
-    spider.post_salary()
-    spider.insert_into_db()
-    spider.post_salary_counter()
-    spider.post_counter()
-    spider.world_cloud()
+    # spider.post_salary()
+    # spider.insert_into_db()
+    # spider.post_salary_counter()
+    # spider.post_counter()
+    # spider.world_cloud()
