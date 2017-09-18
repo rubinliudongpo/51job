@@ -100,14 +100,16 @@ class JobSpider():
         for c in self.company:
             post = c.get('post').replace(',', "或").replace("\"","").replace("#", "Sharp")
             lst.append((c.get('salary'), post, c.get('locate')))
-        pprint(lst)
+        # pprint(lst)
         file_path = os.path.join("data", "post_salary_locate.csv")
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
+            f_csv.writerow(['薪资', '职位', '区域'])
             f_csv.writerows(lst)
-        headers = ['工资', '职位名称', '地区']
-        per_data = genfromtxt(file_path, delimiter=',')
-        plt.plot(per_data)
+        obj = pd.read_csv(file_path, usecols=[2])
+        # obj = pd.DataFrame.from_csv(file_path, header=2)
+        pd.set_option('display.unicode.east_asian_width', True)
+        pprint(obj)
 
     def post_salary(self):
         """ 薪酬统一处理 """
@@ -210,7 +212,7 @@ if __name__ == "__main__":
     spider.job_spider()
     # 按需启动
     spider.post_require()
-    spider.post_desc_counter()
+    # spider.post_desc_counter()
     spider.post_salary_locate()
     # spider.post_salary()
     # spider.insert_into_db()
