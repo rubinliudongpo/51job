@@ -10,6 +10,8 @@ from wordcloud import WordCloud
 import os
 import re
 import pandas as pd
+from pyecharts import Line
+
 
 class JobSpider():
 
@@ -106,13 +108,21 @@ class JobSpider():
             f_csv.writerow(['薪资', '职位', '区域'])
             f_csv.writerows(lst)
         df = pd.read_csv(file_path, usecols=[2])
-        # obj = pd.DataFrame.from_csv(file_path, header=2)
         pd.set_option('display.unicode.east_asian_width', True)
         # pprint(df)
-        # df['区域'] = df['区域'].map(lambda x: x.replace('上海', '海上'))
         df['区域'] = df['区域'].map(lambda x: re.sub(u'-[\u4e00-\u9fff]+$', '', x))
-        # df['区域'] = df['区域'].str.replace('-*', ':')
         pprint(df['区域'])
+        city_counter = {}
+        for seg in df['区域']:
+            city_counter[seg] = city_counter.get(seg, 1) + 1
+        pprint(city_counter)
+        location = list(city_counter.keys())
+        count = list(city_counter.values())
+        line = Line("Python职位需求vs.地区分布折线图")
+        line.add("", location, count, is_smooth=True, mark_line=["max", "average"])
+        line.show_config()
+        render_path = os.path.join("html", "post_salary_locate.html")
+        line.render(render_path)
 
     def post_salary(self):
         """ 薪酬统一处理 """
