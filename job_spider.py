@@ -10,7 +10,7 @@ from wordcloud import WordCloud
 import os
 import re
 import pandas as pd
-from pyecharts import Line
+from pyecharts import Line, Bar
 
 
 class JobSpider():
@@ -73,7 +73,7 @@ class JobSpider():
         jieba.load_userdict(file_path)
         seg_list = jieba.cut(post, cut_all=False)
         counter = dict()
-        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s\d]"
+        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s\d的和有等及与年者或对并中强能]"
         for seg in seg_list:
             if not re.match(pattern, seg, re.VERBOSE):
                 counter[seg] = counter.get(seg, 1) + 1
@@ -83,6 +83,34 @@ class JobSpider():
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(counter_sort)
+        file_path = os.path.join("data", "post_desc_counter.csv")
+        first_50_counter_sort = counter_sort[:50]
+        with open(file_path, "w+", encoding="utf-8") as f:
+            f_csv = csv.writer(f)
+            f_csv.writerows(first_50_counter_sort)
+        keywords = []
+        count = []
+        for row in first_50_counter_sort:
+            keywords.append(row[0])
+            count.append(row[1])
+        line = Bar("Python职位描述关键词柱状图")
+        line.add("", keywords, count)
+        line.show_config()
+        render_path = os.path.join("html", "post_desc_counter.html")
+        line.render(render_path)
+
+        # first_50_english_counter_sort = list()
+        # english_keywords = []
+        # english_count = []
+        # for row in counter_sort:
+        #     if (row[0].match(u"[\u4e00-\u9fff]")):
+        #         english_keywords.append(row[0])
+        #         english_count.append(row[1])
+        # line = Bar("Python职位描述英文关键词柱状图")
+        # line.add("", english_keywords, english_count)
+        # line.show_config()
+        # render_path = os.path.join("html", "post_english_desc_counter.html")
+        # line.render(render_path)
 
     def post_counter(self):
         """ 职位统计 """
@@ -225,8 +253,8 @@ if __name__ == "__main__":
     spider.job_spider()
     # 按需启动
     spider.post_require()
-    # spider.post_desc_counter()
-    spider.post_salary_locate()
+    spider.post_desc_counter()
+    # spider.post_salary_locate()
     # spider.post_salary()
     # spider.insert_into_db()
     # spider.post_salary_counter()
