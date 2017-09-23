@@ -49,7 +49,7 @@ class JobSpider():
         for c in self.company:
             r = requests.get(c.get('href'), headers=self.headers).content.decode('gbk')
             try:
-                bs = BeautifulSoup(r, 'lxml').find('div', class_="bmsg job_msg inbox").text
+                bs = BeautifulSoup(r, 'lxml').find('div', class_=re.compile("info|bmsg job_msg inbox")).text
                 s = bs.replace("举报", "").replace("分享", "").replace("\t", "").strip()
                 self.text += s
             except AttributeError:
@@ -99,18 +99,17 @@ class JobSpider():
         render_path = os.path.join("html", "post_desc_counter.html")
         line.render(render_path)
 
-        # first_50_english_counter_sort = list()
-        # english_keywords = []
-        # english_count = []
-        # for row in counter_sort:
-        #     if (row[0].match(u"[\u4e00-\u9fff]")):
-        #         english_keywords.append(row[0])
-        #         english_count.append(row[1])
-        # line = Bar("Python职位描述英文关键词柱状图")
-        # line.add("", english_keywords, english_count)
-        # line.show_config()
-        # render_path = os.path.join("html", "post_english_desc_counter.html")
-        # line.render(render_path)
+        english_keywords = []
+        english_count = []
+        for row in counter_sort:
+            if (not re.match(u"[\u4e00-\u9fff]", row[0])):
+                english_keywords.append(row[0])
+                english_count.append(row[1])
+        line = Bar("Python职位描述英文关键词柱状图")
+        line.add("", english_keywords[:50], english_count[:50])
+        line.show_config()
+        render_path = os.path.join("html", "post_english_desc_counter.html")
+        line.render(render_path)
 
     def post_counter(self):
         """ 职位统计 """
