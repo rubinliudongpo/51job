@@ -11,7 +11,7 @@ Life is short, you need Python。Python 是一门很优雅的语言，用着挺�
 
 650 条招聘信息中，各城市岗位数量分布如下图。 
 
-![](https://github.com/chenjiandongx/51job/blob/master/html/job_1.png)  
+![](https://github.com/chenjiandongx/51job/blob/master/images/job_1.png)  
 
 上海 228 是最多的，北京 202 排在第二，两者都超过了 200，深圳和广州就和上海北京差得有点多了，分别只有 115 和 91，另外还有 14 个是异地招聘的。当然数据只是针对这前 650 条数据而言！不过总体上也差不多，后面的招聘信息都只是在岗位要求里提到 Python 而已，并没有专门招聘 Python 开发者。
 
