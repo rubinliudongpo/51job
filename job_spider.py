@@ -73,18 +73,32 @@ class JobSpider():
         jieba.load_userdict(file_path)
         seg_list = jieba.cut(post, cut_all=False)
         counter = dict()
-        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、\r\n\s\d的和有等及与年者或对并中强能]"
+        pattern = r"[`~!@#$%^&*()_\-+=<>?:\"{}|,\.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”" \
+                  r"【】、；‘’，。、\r\n\s\d的和有等及与年者或对并中强能把可是不我每天而写]|TO|THE|OF|OR" \
+                  r"|AS|IN|AND|一些|上|假|将|很"
         for seg in seg_list:
-            if not re.match(pattern, seg, re.VERBOSE):
+            if not re.match(pattern, seg, re.I):
                 counter[seg] = counter.get(seg, 1) + 1
         counter_sort = sorted(counter.items(), key=lambda value: value[1], reverse=True)
-        pprint(counter_sort)
+        keys = []
+        updated_counter_sort = dict()
+        for row in counter_sort:
+            keys.append(row[0])
+        for k, v in counter_sort:
+            for row in keys:
+                if updated_counter_sort.get(k.upper()):
+                    updated_counter_sort[k.upper()] += v
+                    break
+                elif not updated_counter_sort.get(k.upper()):
+                    updated_counter_sort[k.upper()] = v
+                    break
+        updated_counter_sort_list = sorted(updated_counter_sort.items(), key=lambda value:value[1], reverse=True)
         file_path = os.path.join("data", "post_pre_desc_counter.csv")
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
-            f_csv.writerows(counter_sort)
+            f_csv.writerows(updated_counter_sort_list)
         file_path = os.path.join("data", "post_desc_counter.csv")
-        first_50_counter_sort = counter_sort[:50]
+        first_50_counter_sort = updated_counter_sort_list[:50]
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(first_50_counter_sort)
@@ -99,9 +113,13 @@ class JobSpider():
         render_path = os.path.join("html", "post_desc_counter.html")
         line.render(render_path)
 
+        english_count_sorted = list()
         english_keywords = []
         english_count = []
-        for row in counter_sort:
+        # for row in updated_counter_sort:
+        #     if (not re.match(u"[\u4e00-\u9fff]", row[0])):
+        #         english_count_sorted[row[0]] = row[1]
+        for row in updated_counter_sort_list:
             if (not re.match(u"[\u4e00-\u9fff]", row[0])):
                 english_keywords.append(row[0])
                 english_count.append(row[1])
@@ -253,7 +271,7 @@ if __name__ == "__main__":
     # 按需启动
     spider.post_require()
     spider.post_desc_counter()
-    # spider.post_salary_locate()
+    spider.post_salary_locate()
     # spider.post_salary()
     # spider.insert_into_db()
     # spider.post_salary_counter()
