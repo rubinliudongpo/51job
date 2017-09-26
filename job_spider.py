@@ -98,7 +98,7 @@ class JobSpider():
             f_csv = csv.writer(f)
             f_csv.writerows(updated_counter_sort_list)
         file_path = os.path.join("data", "post_desc_counter.csv")
-        first_50_counter_sort = updated_counter_sort_list[:50]
+        first_50_counter_sort = updated_counter_sort_list[:20]
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(first_50_counter_sort)
@@ -124,7 +124,7 @@ class JobSpider():
                 english_keywords.append(row[0])
                 english_count.append(row[1])
         line = Bar("Python职位描述英文关键词柱状图")
-        line.add("", english_keywords[:50], english_count[:50])
+        line.add("", english_keywords[:20], english_count[:20])
         line.show_config()
         render_path = os.path.join("html", "post_english_desc_counter.html")
         line.render(render_path)
@@ -139,6 +139,8 @@ class JobSpider():
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(counter_most)
+
+
 
     def post_salary_locate(self):
         """ 招聘大概信息，职位，薪酬以及工作地点 """
@@ -171,7 +173,7 @@ class JobSpider():
 
     def post_salary(self):
         """ 薪酬统一处理 """
-        mouth = []
+        month = []
         year = []
         thouand = []
         file_path = os.path.join("data", "post_salary_locate.csv")
@@ -179,14 +181,14 @@ class JobSpider():
             f_csv = csv.reader(f)
             for row in f_csv:
                 if "万/月" in row[0]:
-                    mouth.append((row[0][:-3], row[2], row[1]))
+                    month.append((row[0][:-3], row[2], row[1]))
                 elif "万/年" in row[0]:
                     year.append((row[0][:-3], row[2], row[1]))
                 elif "千/月" in row[0]:
                     thouand.append((row[0][:-3], row[2], row[1]))
-        # pprint(mouth)
+        pprint(month)
         calc = []
-        for m in mouth:
+        for m in month:
             s = m[0].split("-")
             calc.append(
                 (round((float(s[1]) - float(s[0])) * 0.4 + float(s[0]), 1), m[1], m[2]))
@@ -216,6 +218,15 @@ class JobSpider():
         with open(file_path, "w+", encoding="utf-8") as f:
             f_csv = csv.writer(f)
             f_csv.writerows(counter)
+
+        salary_list = [c.get('salary') for c in self.company]
+        counter = Counter(salary_list)
+        counter_most = counter.most_common()
+        pprint(counter_most)
+        file_path = os.path.join("data", "post_salary_counter.csv")
+        with open(file_path, "w+", encoding="utf-8") as f:
+            f_csv = csv.writer(f)
+            f_csv.writerows(counter_most)
 
     def world_cloud(self):
         """ 生成词云 """
@@ -264,16 +275,15 @@ class JobSpider():
                     print(e)
         cur.close()
 
-
 if __name__ == "__main__":
     spider = JobSpider()
     spider.job_spider()
     # 按需启动
-    spider.post_require()
-    spider.post_desc_counter()
-    spider.post_salary_locate()
+    # spider.post_require()
+    # spider.post_desc_counter()
+    # spider.post_salary_locate()
     # spider.post_salary()
     # spider.insert_into_db()
-    # spider.post_salary_counter()
+    spider.post_salary_counter()
     # spider.post_counter()
     # spider.world_cloud()
